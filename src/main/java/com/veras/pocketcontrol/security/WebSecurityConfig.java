@@ -2,8 +2,9 @@ package com.veras.pocketcontrol.security;
 
 import com.veras.pocketcontrol.security.filters.CustomAuthenticationFilter;
 import com.veras.pocketcontrol.security.filters.CustomAuthorizationFilter;
+import com.veras.pocketcontrol.services.ScheduleService;
+import com.veras.pocketcontrol.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
     private final UserDetailsService userDetailsService;
+    private final UserService userService;
+    private final ScheduleService scheduleService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
@@ -40,7 +43,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean(), userService, scheduleService);
         customAuthenticationFilter.setFilterProcessesUrl("/api/auth/login");
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);

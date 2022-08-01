@@ -21,10 +21,9 @@ import java.util.Optional;
 public class TransactionController {
 
     private final TransactionService transactionService;
-    private final CategoryService categoryService;
 
     @GetMapping
-    @ApiOperation(value = "Recuperar todas as transações do usuário", authorizations = { @Authorization(value="jwtToken") })
+    @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
     public ResponseEntity<List<Transaction>> fetchCategory(@RequestParam(required = false) String id) {
         Optional<List<Transaction>> schedule = id == null ? transactionService.getAllTransactions() : Optional.of(transactionService.getTransaction(id).stream().toList());
         if(schedule.isPresent()){
@@ -35,13 +34,13 @@ public class TransactionController {
     }
 
     @PostMapping
-    @ApiOperation(value = "Recuperar uma transação do usuário", authorizations = { @Authorization(value="jwtToken") })
+    @ApiOperation(value = "Inserir transação", authorizations = { @Authorization(value="jwtToken") })
     public Transaction insertTransaction(@RequestBody Transaction transaction){
         return transactionService.insertTransaction(transaction);
     }
 
     @PutMapping
-    @ApiOperation(value = "Adicionar Transação", authorizations = { @Authorization(value="jwtToken") })
+    @ApiOperation(value = "Atualizar Transação", authorizations = { @Authorization(value="jwtToken") })
     public Transaction updateTransaction(@RequestBody Transaction transaction){
         return transactionService.updateTransaction(transaction);
     }

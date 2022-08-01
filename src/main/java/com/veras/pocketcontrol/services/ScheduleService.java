@@ -3,6 +3,7 @@ package com.veras.pocketcontrol.services;
 import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.ScheduleRepository;
+import com.veras.pocketcontrol.utils.Consts;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,46 +16,55 @@ import java.util.Optional;
 @AllArgsConstructor
 @Service
 public class ScheduleService {
-    private final ScheduleRepository ScheduleRepository;
+    private final ScheduleRepository scheduleRepository;
 
     private final UserService userService;
     public Optional<List<Schedule>> getAllSchedules() {
-        return ScheduleRepository.findAllByUserId(userService.getLoggedUserId());
+        return scheduleRepository.findAllByUserId(userService.getLoggedUserId());
     }
 
     public Optional<Schedule> getSchedule(String id) {
-        return ScheduleRepository.findByIdAndUserId(id, userService.getLoggedUserId());
+        return scheduleRepository.findByIdAndUserId(id, userService.getLoggedUserId());
     }
 
     public Schedule insertSchedule(Schedule schedule) {
-        Schedule scheduleInserted = ScheduleRepository.insert(schedule);
+        Schedule scheduleInserted = scheduleRepository.insert(schedule);
         return scheduleInserted;
     }
 
     public Schedule updateSchedule(Schedule schedule) {
-        Schedule scheduleToUpdate = ScheduleRepository.save(schedule);
+        Schedule scheduleToUpdate = scheduleRepository.save(schedule);
         return scheduleToUpdate;
     }
 
     public Schedule deleteSchedule(String id) {
-        Schedule ScheduleDeleted = ScheduleRepository.findById(id).get();
-        ScheduleRepository.deleteById(id);
+        Schedule ScheduleDeleted = scheduleRepository.findById(id).get();
+        scheduleRepository.deleteById(id);
         return ScheduleDeleted;
     }
 
-    public void CreateScheduledTransactions(){
+    public void createScheduledTransactions(){
         List<Schedule> schedulesForToday = this.getSchedulesForToday();
         if(schedulesForToday.isEmpty()) {
             insertTransactionsScheduled(schedulesForToday);
             this.updateInsertedSchedules(schedulesForToday);
         } else {
-            System.out.println("Nenhuma transação a ser cadastrada");
+            System.out.println(Consts.NO_TRANSACTIONS_TO_INSERT_MESSAGE);
         }
     }
 
+    public List<Schedule> getSchedulesForToday() {
+        List<Schedule> schedulesToCreateToday = scheduleRepository.findByDayOfMonthAndUserIdAndAlreadyInsertedIsFalse(Calendar.getInstance().DAY_OF_MONTH, userService.getLoggedUserId());
+        int yesterday = LocalDateTime.now().getDayOfMonth() - 1;
+        List<Schedule> schedulesToCreateSinceLastLogin = scheduleRepository.findByIntervalDayOfMouthNotInserted(userService.getLastLoginDay(), yesterday, userService.getLoggedUserId()).get();
+        schedulesToCreateToday.addAll(schedulesToCreateSinceLastLogin);
+        return schedulesToCreateToday;
+    }
+
+
     private void updateInsertedSchedules(List<Schedule> schedulesForToday) {
         schedulesForToday.forEach(schedule -> {
-            schedule.setAlreadyInsertedToday(true);
+            schedule.setAlreadyInserted(true);
             this.updateSchedule(schedule);
         });
     }
@@ -66,9 +76,5 @@ public class ScheduleService {
             transactionToInsert.setDate(LocalDateTime.now());
             transactionToInsert.setId(null);
         });
-    }
-
-    public List<Schedule> getSchedulesForToday() {
-        return ScheduleRepository.findByDayOfMonthAndAlreadyInsertedTodayIsFalse(Calendar.getInstance().DAY_OF_MONTH);
     }
 }

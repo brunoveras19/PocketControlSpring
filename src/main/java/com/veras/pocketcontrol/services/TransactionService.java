@@ -3,8 +3,7 @@ package com.veras.pocketcontrol.services;
 import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.TransactionRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,7 +34,9 @@ public class TransactionService {
     }
 
     public Transaction updateTransaction(Transaction transaction) {
-        Transaction transactionInserted = transactionRepository.save(transaction);
+        Transaction transactionToUpdate = transactionRepository.findById(transaction.getId()).get();
+        verifyAndUpdateFieldsWithValue(transaction, transactionToUpdate);
+        Transaction transactionInserted = transactionRepository.save(transactionToUpdate);
         return transactionInserted;
     }
 
@@ -44,5 +45,13 @@ public class TransactionService {
         transactionRepository.deleteById(id);
         transactionDeleted.setId(null);
         return transactionDeleted;
+    }
+
+    private void verifyAndUpdateFieldsWithValue(Transaction transaction, Transaction transactionToUpdate) {
+        transactionToUpdate.setAmount(transaction.getAmount() != null ? transaction.getAmount() : transactionToUpdate.getAmount());
+        transactionToUpdate.setDescription(transaction.getDescription() != null ? transaction.getDescription() : transactionToUpdate.getDescription());
+        transactionToUpdate.setCategoryId(transaction.getCategoryId() != null ? transaction.getCategoryId() : transactionToUpdate.getCategoryId());
+        transactionToUpdate.setCategory(transaction.getCategoryId() != null ? categoryService.getCategory(transaction.getCategoryId()).get() : categoryService.getCategory(transactionToUpdate.getCategoryId()).get());
+        transactionToUpdate.setUserId(userService.getLoggedUserId());
     }
 }

@@ -2,6 +2,7 @@ package com.veras.pocketcontrol.services;
 
 import com.veras.pocketcontrol.models.User;
 import com.veras.pocketcontrol.repositories.UserRepository;
+import com.veras.pocketcontrol.utils.Consts;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -21,12 +23,13 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUserName(username);
         if(!user.isPresent()){
-            System.out.println("Usuário não encontrado");
-            throw new UsernameNotFoundException("Usuário não encontrado");
+            System.out.println(Consts.USER_NOT_FOUND_MESSAGE);
+            throw new UsernameNotFoundException(Consts.USER_NOT_FOUND_MESSAGE);
         }
 
         //Preencher com roles quando implementar
@@ -69,4 +72,13 @@ public class UserService implements UserDetailsService {
         return userDeleted;
     }
 
+    public void updateUserLastLogin(String username) {
+        User user = userRepository.findByUserName(username).get();
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public Integer getLastLoginDay() {
+        return this.getUser(this.getLoggedUserId()).get().getLastLogin().getDayOfMonth();
+    }
 }

@@ -5,7 +5,6 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.veras.pocketcontrol.utils.Consts;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -61,7 +60,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     }
 
     private boolean isOpenPath(String servletPath) {
-        return Consts.openPaths.contains(servletPath)
+        return Consts.OPEN_PATHS.contains(servletPath)
                 || servletPath.contains("/webjars/")
                 || servletPath.contains("/swagger-resources")
                 || servletPath.contains("/v2/api-docs")
