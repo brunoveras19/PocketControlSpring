@@ -68,8 +68,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         tokens.put("refresh_token", access_token);
         response.setContentType(APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getOutputStream(), tokens);
-        userService.updateUserLastLogin(user.getUsername());
-        scheduleService.createScheduledTransactions();
     }
 
 }
