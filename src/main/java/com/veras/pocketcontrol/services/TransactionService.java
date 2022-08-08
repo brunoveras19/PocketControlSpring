@@ -27,8 +27,10 @@ public class TransactionService {
     }
 
     public Transaction insertTransaction(Transaction transaction) {
-        transaction.setCategory(categoryService.getCategory(transaction.getCategoryId()).get());
-        transaction.setUserId(userService.getLoggedUserId());
+        if(transaction.getCategory() == null)
+            transaction.setCategory(categoryService.getCategory(transaction.getCategoryId()).get());
+        if(transaction.getUserId() == null)
+            transaction.setUserId(userService.getLoggedUserId());
         Transaction transactionInserted = transactionRepository.insert(transaction);
         return transactionInserted;
     }

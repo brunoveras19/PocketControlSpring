@@ -5,6 +5,7 @@ import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.ScheduleRepository;
 import com.veras.pocketcontrol.utils.Consts;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Service
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final TransactionService transactionService;
 
     private final UserService userService;
     public Optional<List<Schedule>> getAllSchedules() {
@@ -28,6 +30,8 @@ public class ScheduleService {
     }
 
     public Schedule insertSchedule(Schedule schedule) {
+        Transaction transaction = transactionService.getTransaction(schedule.getTransactionId()).get();
+        schedule.setBaseTransaction(transaction);
         Schedule scheduleInserted = scheduleRepository.insert(schedule);
         return scheduleInserted;
     }
@@ -42,39 +46,35 @@ public class ScheduleService {
         scheduleRepository.deleteById(id);
         return ScheduleDeleted;
     }
-
+    @Scheduled(cron  = "0 0 01 * * ?")
     public void createScheduledTransactions(){
         List<Schedule> schedulesForToday = this.getSchedulesForToday();
-        if(schedulesForToday.isEmpty()) {
+        if(!schedulesForToday.isEmpty()) {
             insertTransactionsScheduled(schedulesForToday);
-            this.updateInsertedSchedules(schedulesForToday);
         } else {
             System.out.println(Consts.NO_TRANSACTIONS_TO_INSERT_MESSAGE);
         }
     }
 
     public List<Schedule> getSchedulesForToday() {
-        List<Schedule> schedulesToCreateToday = scheduleRepository.findByDayOfMonthAndUserIdAndAlreadyInsertedIsFalse(Calendar.getInstance().DAY_OF_MONTH, userService.getLoggedUserId());
-        int yesterday = LocalDateTime.now().getDayOfMonth() - 1;
-        List<Schedule> schedulesToCreateSinceLastLogin = scheduleRepository.findByIntervalDayOfMouthNotInserted(userService.getLastLoginDay(), yesterday, userService.getLoggedUserId()).get();
-        schedulesToCreateToday.addAll(schedulesToCreateSinceLastLogin);
+        int today = LocalDateTime.now().getDayOfMonth();
+        List<Schedule> schedulesToCreateToday = scheduleRepository.findByDayOfMonth(today).get();
         return schedulesToCreateToday;
-    }
-
-
-    private void updateInsertedSchedules(List<Schedule> schedulesForToday) {
-        schedulesForToday.forEach(schedule -> {
-            schedule.setAlreadyInserted(true);
-            this.updateSchedule(schedule);
-        });
     }
 
     private void insertTransactionsScheduled(List<Schedule> schedulesForToday) {
         schedulesForToday.forEach(schedule -> {
             Transaction transactionToInsert = new Transaction();
+            transactionToInsert.setCategory(schedule.getBaseTransaction().getCategory());
+            transactionToInsert.setCategoryId(schedule.getBaseTransaction().getCategoryId());
+            transactionToInsert.setDescription(schedule.getBaseTransaction().getDescription() + " Agendado");
             transactionToInsert.setAmount(schedule.getBaseTransaction().getAmount());
             transactionToInsert.setDate(LocalDateTime.now());
+            transactionToInsert.setUserId(schedule.getBaseTransaction().getUserId());
             transactionToInsert.setId(null);
+
+            transactionService.insertTransaction(transactionToInsert);
         });
     }
+
 }

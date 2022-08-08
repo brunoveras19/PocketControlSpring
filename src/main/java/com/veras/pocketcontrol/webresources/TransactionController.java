@@ -1,13 +1,10 @@
 package com.veras.pocketcontrol.webresources;
 
-import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
-import com.veras.pocketcontrol.services.CategoryService;
 import com.veras.pocketcontrol.services.TransactionService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

@@ -10,7 +10,8 @@ public class Consts {
                 add("/api/auth/login");
                 add("/api/auth/user");
                 add("/swagger-ui.html");
-            }});
+            }}
+    );
 
     public static final String USER_NOT_FOUND_MESSAGE = "Usuário não encontrado";
     public static final String USER_CREATED_MESSAGE = "Usuário criado com sucesso!";
