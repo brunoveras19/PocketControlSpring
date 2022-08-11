@@ -67,7 +67,7 @@ public class ScheduleService {
             Transaction transactionToInsert = new Transaction();
             transactionToInsert.setCategory(schedule.getBaseTransaction().getCategory());
             transactionToInsert.setCategoryId(schedule.getBaseTransaction().getCategoryId());
-            transactionToInsert.setDescription(schedule.getBaseTransaction().getDescription() + " Agendado");
+            transactionToInsert.setDescription(Consts.SCHEDULED_TRANSACTION_TAG + schedule.getBaseTransaction().getDescription());
             transactionToInsert.setAmount(schedule.getBaseTransaction().getAmount());
             transactionToInsert.setDate(LocalDateTime.now());
             transactionToInsert.setUserId(schedule.getBaseTransaction().getUserId());

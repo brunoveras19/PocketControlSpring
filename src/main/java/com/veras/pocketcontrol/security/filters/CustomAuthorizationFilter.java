@@ -23,7 +23,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private static final String BEARER = "Bearer ";
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        System.out.println(request.getHeader(AUTHORIZATION));
         if(isOpenPath(request.getServletPath())) {
             filterChain.doFilter(request, response);
         } else {

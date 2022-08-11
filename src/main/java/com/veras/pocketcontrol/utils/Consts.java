@@ -16,4 +16,6 @@ public class Consts {
     public static final String USER_NOT_FOUND_MESSAGE = "Usuário não encontrado";
     public static final String USER_CREATED_MESSAGE = "Usuário criado com sucesso!";
     public static final String NO_TRANSACTIONS_TO_INSERT_MESSAGE = "Nenhuma transação a ser cadastrada";
+
+    public static final String SCHEDULED_TRANSACTION_TAG = "<Transação Agendada>";
 }
