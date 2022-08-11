@@ -19,7 +19,5 @@ public class Schedule {
 
     private Transaction baseTransaction;
 
-    private boolean alreadyInsertedToday;
-
     private String userId;
 }

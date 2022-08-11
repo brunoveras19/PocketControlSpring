@@ -12,7 +12,7 @@ public class Transaction {
     @Id
     private String id;
 
-    private Float amount;
+    private Double amount;
 
     private LocalDateTime date;
 
