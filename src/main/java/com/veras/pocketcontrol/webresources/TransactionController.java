@@ -22,12 +22,19 @@ public class TransactionController {
     @GetMapping
     @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
     public ResponseEntity<List<Transaction>> fetchCategory(@RequestParam(required = false) String id) {
-        Optional<List<Transaction>> schedule = id == null ? transactionService.getAllTransactions() : Optional.of(transactionService.getTransaction(id).stream().toList());
-        if(schedule.isPresent()){
-            return ResponseEntity.of(schedule);
+        Optional<List<Transaction>> transactions = id == null ? transactionService.getAllTransactions() : Optional.of(transactionService.getTransaction(id).stream().toList());
+        if(transactions.isPresent()){
+            return ResponseEntity.of(transactions);
         } else {
             return ResponseEntity.of(Optional.of(Collections.emptyList()));
         }
+    }
+
+    @GetMapping("balance")
+    @ApiOperation(value = "Recuperar saldo das transações do usuário", authorizations = { @Authorization(value="jwtToken") })
+    public ResponseEntity<Double> fetchBalance() {
+        Double balance =  transactionService.getBalance();
+        return ResponseEntity.ok(balance);
     }
 
     @PostMapping

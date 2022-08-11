@@ -49,6 +49,15 @@ public class TransactionService {
         return transactionDeleted;
     }
 
+    public Double getBalance() {
+        Double balance = 0.0;
+        Optional<List<Transaction>> transactions = this.getAllTransactions();
+        for(Transaction transaction :  transactions.get()){
+            balance += transaction.getAmount();
+        }
+        return Math.round(balance * 100) / 100d;
+    }
+
     private void verifyAndUpdateFieldsWithValue(Transaction transaction, Transaction transactionToUpdate) {
         transactionToUpdate.setAmount(transaction.getAmount() != null ? transaction.getAmount() : transactionToUpdate.getAmount());
         transactionToUpdate.setDescription(transaction.getDescription() != null ? transaction.getDescription() : transactionToUpdate.getDescription());
@@ -56,4 +65,6 @@ public class TransactionService {
         transactionToUpdate.setCategory(transaction.getCategoryId() != null ? categoryService.getCategory(transaction.getCategoryId()).get() : categoryService.getCategory(transactionToUpdate.getCategoryId()).get());
         transactionToUpdate.setUserId(userService.getLoggedUserId());
     }
+
+
 }
