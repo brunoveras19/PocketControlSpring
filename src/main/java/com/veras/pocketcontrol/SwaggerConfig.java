@@ -29,8 +29,8 @@ public class SwaggerConfig {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Sig-Predict REST API Document")
-                .description("work in progress")
+                .title("PocketControlAPI Documentation")
+                .description("Documentação da API do aplicação Pocket Control")
                 .termsOfServiceUrl("localhost")
                 .version("1.0")
                 .build();
