@@ -19,7 +19,7 @@ public class TransactionService {
 
     private  final UserService userService;
     public Optional<List<Transaction>> getAllTransactions() {
-        return transactionRepository.findAllByUserId(userService.getLoggedUserId());
+        return transactionRepository.findAllByUserIdOrderByDateDesc(userService.getLoggedUserId());
     }
 
     public Optional<Transaction> getTransaction(String id) {

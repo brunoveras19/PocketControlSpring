@@ -25,4 +25,11 @@ public class AuthController {
         return ResponseEntity.created(uri).body(Consts.USER_CREATED_MESSAGE);
     }
 
+    @PutMapping("/user")
+    public ResponseEntity<String> updateUser(@RequestBody User user){
+        URI uri = URI.create(ServletUriComponentsBuilder.fromCurrentContextPath().path("/api/auth/user").toUriString());
+        userService.updateUser(user);
+        return ResponseEntity.created(uri).body(Consts.USER_CREATED_MESSAGE);
+    }
+
 }

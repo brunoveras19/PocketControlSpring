@@ -62,9 +62,16 @@ public class UserService implements UserDetailsService {
         return userInserted;
     }
 
-    public User updateUser(User user) {
-        User userToUpdate = userRepository.save(user);
-        return userToUpdate;
+    public User updateUser(User user) throws UsernameNotFoundException{
+        Optional<User> opUserToUpdate = getUserByUserName(user.getUserName());
+        if(opUserToUpdate.isPresent()){
+            User userToUpdate = opUserToUpdate.get();
+            userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
+            User userUpdated = userRepository.save(user);
+            return userUpdated;
+        } else {
+            throw new UsernameNotFoundException(Consts.USER_NOT_FOUND_MESSAGE);
+        }
     }
 
     public User deleteUser(String id) {
