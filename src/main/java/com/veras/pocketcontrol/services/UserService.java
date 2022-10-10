@@ -27,7 +27,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         System.out.println(username);
-        Optional<User> user = userRepository.findByUserName(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if(!user.isPresent()){
             System.out.println(Consts.USER_NOT_FOUND_MESSAGE);
             throw new UsernameNotFoundException(Consts.USER_NOT_FOUND_MESSAGE);
@@ -35,11 +35,11 @@ public class UserService implements UserDetailsService {
 
         //Preencher com roles quando implementar
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        return new org.springframework.security.core.userdetails.User(user.get().getUserName(), user.get().getPassword(), authorities);
+        return new org.springframework.security.core.userdetails.User(user.get().getUsername(), user.get().getPassword(), authorities);
     }
 
     public String getLoggedUserId() {
-        return this.getUserByUserName(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId();
+        return this.getUserByUsername(SecurityContextHolder.getContext().getAuthentication().getName()).get().getId();
     }
 
 
@@ -51,8 +51,8 @@ public class UserService implements UserDetailsService {
         return userRepository.findById(id);
     }
 
-    public Optional<User> getUserByUserName(String userName) {
-        return userRepository.findByUserName(userName);
+    public Optional<User> getUserByUsername(String userName) {
+        return userRepository.findByUsername(userName);
     }
 
     public User insertUser(User user) {
@@ -63,7 +63,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUser(User user) throws UsernameNotFoundException{
-        Optional<User> opUserToUpdate = getUserByUserName(user.getUserName());
+        Optional<User> opUserToUpdate = getUserByUsername(user.getUsername());
         if(opUserToUpdate.isPresent()){
             User userToUpdate = opUserToUpdate.get();
             userToUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -81,7 +81,7 @@ public class UserService implements UserDetailsService {
     }
 
     public void updateUserLastLogin(String username) {
-        User user = userRepository.findByUserName(username).get();
+        User user = userRepository.findByUsername(username).get();
         user.setLastLogin(LocalDateTime.now());
         userRepository.save(user);
     }
