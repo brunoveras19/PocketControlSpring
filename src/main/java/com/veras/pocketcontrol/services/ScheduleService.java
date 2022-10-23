@@ -5,6 +5,7 @@ import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.ScheduleRepository;
 import com.veras.pocketcontrol.utils.Consts;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final TransactionService transactionService;
@@ -48,30 +50,39 @@ public class ScheduleService {
     }
     @Scheduled(cron  = "0 0 01 * * ?")
     public void createScheduledTransactions(){
-        List<Schedule> schedulesForToday = this.getSchedulesForToday();
+        List<Schedule> schedulesForToday = this.getSchedulesToCreateToday();
         if(!schedulesForToday.isEmpty()) {
             insertTransactionsScheduled(schedulesForToday);
         } else {
-            System.out.println(Consts.NO_TRANSACTIONS_TO_INSERT_MESSAGE);
+            log.info(Consts.NO_TRANSACTIONS_TO_INSERT_MESSAGE);
         }
     }
 
-    public List<Schedule> getSchedulesForToday() {
+    public List<Schedule> getSchedulesToCreateToday() {
         int today = LocalDateTime.now().getDayOfMonth();
-        List<Schedule> schedulesToCreateToday = scheduleRepository.findByDayOfMonth(today).get();
+        List<Schedule> schedulesToCreateToday = scheduleRepository
+                .findByDayOfMonthAndHasDefinedAmountIsTrueAndUserId(today, userService.getLoggedUserId()).get();
+        return schedulesToCreateToday;
+    }
+
+    public List<Schedule> getSchedulesToNotifyToday() {
+        int today = LocalDateTime.now().getDayOfMonth();
+        List<Schedule> schedulesToCreateToday = scheduleRepository
+                .findByDayOfMonthAndHasDefinedAmountIsFalseAndUserId(today, userService.getLoggedUserId()).get();
         return schedulesToCreateToday;
     }
 
     private void insertTransactionsScheduled(List<Schedule> schedulesForToday) {
         schedulesForToday.forEach(schedule -> {
-            Transaction transactionToInsert = new Transaction();
-            transactionToInsert.setCategory(schedule.getBaseTransaction().getCategory());
-            transactionToInsert.setCategoryId(schedule.getBaseTransaction().getCategoryId());
-            transactionToInsert.setDescription(Consts.SCHEDULED_TRANSACTION_TAG + schedule.getBaseTransaction().getDescription());
-            transactionToInsert.setAmount(schedule.getBaseTransaction().getAmount());
-            transactionToInsert.setDate(LocalDateTime.now());
-            transactionToInsert.setUserId(schedule.getBaseTransaction().getUserId());
-            transactionToInsert.setId(null);
+            Transaction transactionToInsert = Transaction.builder()
+                    .category(schedule.getBaseTransaction().getCategory())
+                    .categoryId(schedule.getBaseTransaction().getCategoryId())
+                    .description(Consts.SCHEDULED_TRANSACTION_TAG + schedule.getBaseTransaction().getDescription())
+                    .amount(schedule.getBaseTransaction().getAmount())
+                    .date(LocalDateTime.now())
+                    .userId(schedule.getBaseTransaction().getUserId())
+                    .id(null)
+                    .build();
 
             transactionService.insertTransaction(transactionToInsert);
         });

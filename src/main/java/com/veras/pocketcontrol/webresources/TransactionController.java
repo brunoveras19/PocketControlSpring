@@ -21,13 +21,19 @@ public class TransactionController {
 
     @GetMapping
     @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
-    public ResponseEntity<List<Transaction>> fetchCategory(@RequestParam(required = false) String id) {
+    public ResponseEntity<List<Transaction>> fetchTransaction(@RequestParam(required = false) String id) {
         Optional<List<Transaction>> transactions = id == null ? transactionService.getAllTransactions() : Optional.of(transactionService.getTransaction(id).stream().toList());
         if(transactions.isPresent()){
             return ResponseEntity.of(transactions);
         } else {
             return ResponseEntity.of(Optional.of(Collections.emptyList()));
         }
+    }
+
+    @GetMapping("/search")
+    @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
+    public ResponseEntity<List<Transaction>> searchTransactions(@RequestParam String q) {
+            return ResponseEntity.of(transactionService.searchByDescription(q));
     }
 
     @GetMapping("balance")

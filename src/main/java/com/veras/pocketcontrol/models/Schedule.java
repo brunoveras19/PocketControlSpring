@@ -20,4 +20,7 @@ public class Schedule {
     private Transaction baseTransaction;
 
     private String userId;
+
+    private Boolean hasDefinedAmount;
 }
+

@@ -4,6 +4,7 @@ import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.TransactionRepository;
 import lombok.AllArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Optional;
 
 @AllArgsConstructor
 @Service
+@Slf4j
 public class TransactionService {
 
     private final TransactionRepository transactionRepository;
@@ -24,6 +26,11 @@ public class TransactionService {
 
     public Optional<Transaction> getTransaction(String id) {
         return transactionRepository.findByIdAndUserId(id, userService.getLoggedUserId());
+    }
+
+    public Optional<List<Transaction>> searchByDescription(String search){
+        log.info(search);
+        return transactionRepository.findByDescriptionLikeIgnoreCaseAndUserId(search, userService.getLoggedUserId());
     }
 
     public Transaction insertTransaction(Transaction transaction) {
