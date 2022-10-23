@@ -11,5 +11,7 @@ import java.util.Optional;
 public interface ScheduleRepository extends MongoRepository<Schedule, String> {
     Optional<List<Schedule>> findAllByUserId(String userId);
     Optional<Schedule> findByIdAndUserId(String id,String userId);
-    Optional<List<Schedule>> findByDayOfMonth(Integer dayOfMonth);
+    Optional<List<Schedule>> findByDayOfMonthAndIsFixedValueIsTrueAndUserId(Integer dayOfMonth, String userId);
+
+    Optional<List<Schedule>> findByDayOfMonthAndIsFixedValueIsFalseAndUserId(Integer dayOfMonth, String userId);
 }

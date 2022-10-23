@@ -1,5 +1,7 @@
 package com.veras.pocketcontrol.webresources;
 
+import com.veras.pocketcontrol.models.DTO.CreateTransactionDTO;
+import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.services.TransactionService;
 import io.swagger.annotations.ApiOperation;
@@ -19,15 +21,23 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
+    private final ScheduleController scheduleController;
+
     @GetMapping
     @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
-    public ResponseEntity<List<Transaction>> fetchCategory(@RequestParam(required = false) String id) {
+    public ResponseEntity<List<Transaction>> fetchTransaction(@RequestParam(required = false) String id) {
         Optional<List<Transaction>> transactions = id == null ? transactionService.getAllTransactions() : Optional.of(transactionService.getTransaction(id).stream().toList());
         if(transactions.isPresent()){
             return ResponseEntity.of(transactions);
         } else {
             return ResponseEntity.of(Optional.of(Collections.emptyList()));
         }
+    }
+
+    @GetMapping("/search")
+    @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
+    public ResponseEntity<List<Transaction>> searchTransactions(@RequestParam String q) {
+            return ResponseEntity.of(transactionService.searchByDescription(q));
     }
 
     @GetMapping("balance")
@@ -39,8 +49,19 @@ public class TransactionController {
 
     @PostMapping
     @ApiOperation(value = "Inserir transação", authorizations = { @Authorization(value="jwtToken") })
-    public Transaction insertTransaction(@RequestBody Transaction transaction){
-        return transactionService.insertTransaction(transaction);
+    public Transaction insertTransaction(@RequestBody CreateTransactionDTO createTransactionDTO){
+        Transaction transaction = transactionService.insertTransaction(createTransactionDTO.getTransaction());
+        if(createTransactionDTO.getIsSchedule()){
+            Schedule schedule = Schedule.builder()
+                    .transactionId(transaction.getId())
+                    .dayOfMonth(transaction.getDate().getDayOfMonth())
+                    .description(transaction.getDescription())
+                    .isFixedValue(createTransactionDTO.getIsFixedValue())
+                    .build();
+
+            scheduleController.insertSchedule(schedule);
+        }
+        return transaction;
     }
 
     @PutMapping

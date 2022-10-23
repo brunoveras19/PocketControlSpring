@@ -30,14 +30,17 @@ public class StatisticService {
     private static final String AMOUNT_FIELD = "amount";
     private static final String MONTH_FIELD = "month";
 
+    private static final String SUM = "sum";
+    private static final String AVG = "avg";
+
 
     public List<CategoryMonthlyAvg> listMonthlyAverageByCategories() {
         MatchOperation match = Aggregation.match(Criteria.where(USER_ID_FIELD).is(userService.getLoggedUserId()));
         ProjectionOperation project1 = Aggregation.project(CATEGORY_ID_FIELD, AMOUNT_FIELD)
                 .andExpression("month(date)").as(MONTH_FIELD);
-        GroupOperation groupSum = Aggregation.group(CATEGORY_ID_FIELD, MONTH_FIELD).sum(AMOUNT_FIELD).as("sum");
-        GroupOperation groupAvg = Aggregation.group(CATEGORY_ID_FIELD).avg("sum").as("avg");
-        ProjectionOperation project2 = Aggregation.project("avg").and(CATEGORY_ID_FIELD).previousOperation();
+        GroupOperation groupSum = Aggregation.group(CATEGORY_ID_FIELD, MONTH_FIELD).sum(AMOUNT_FIELD).as(SUM);
+        GroupOperation groupAvg = Aggregation.group(CATEGORY_ID_FIELD).avg(SUM).as(AVG);
+        ProjectionOperation project2 = Aggregation.project(AVG).and(CATEGORY_ID_FIELD).previousOperation();
         Aggregation aggregation = Aggregation.newAggregation(match, project1, groupSum, groupAvg, project2);
         List<CategoryMonthlyAvg> results = mongoTemplate.aggregate(aggregation, mongoTemplate.getCollectionName(Transaction.class), CategoryMonthlyAvg.class).getMappedResults();
         log.info(results.toString());
