@@ -1,11 +1,13 @@
 package com.veras.pocketcontrol.models;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document
+@Builder
 public class Schedule {
 
     @Id
@@ -21,6 +23,6 @@ public class Schedule {
 
     private String userId;
 
-    private Boolean hasDefinedAmount;
+    private Boolean isFixedValue;
 }
 

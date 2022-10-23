@@ -1,5 +1,7 @@
 package com.veras.pocketcontrol.webresources;
 
+import com.veras.pocketcontrol.models.DTO.CreateTransactionDTO;
+import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.services.TransactionService;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +20,8 @@ import java.util.Optional;
 public class TransactionController {
 
     private final TransactionService transactionService;
+
+    private final ScheduleController scheduleController;
 
     @GetMapping
     @ApiOperation(value = "Recuperar transações do usuário", authorizations = { @Authorization(value="jwtToken") })
@@ -45,8 +49,19 @@ public class TransactionController {
 
     @PostMapping
     @ApiOperation(value = "Inserir transação", authorizations = { @Authorization(value="jwtToken") })
-    public Transaction insertTransaction(@RequestBody Transaction transaction){
-        return transactionService.insertTransaction(transaction);
+    public Transaction insertTransaction(@RequestBody CreateTransactionDTO createTransactionDTO){
+        Transaction transaction = transactionService.insertTransaction(createTransactionDTO.getTransaction());
+        if(createTransactionDTO.getIsSchedule()){
+            Schedule schedule = Schedule.builder()
+                    .transactionId(transaction.getId())
+                    .dayOfMonth(transaction.getDate().getDayOfMonth())
+                    .description(transaction.getDescription())
+                    .isFixedValue(createTransactionDTO.getIsFixedValue())
+                    .build();
+
+            scheduleController.insertSchedule(schedule);
+        }
+        return transaction;
     }
 
     @PutMapping

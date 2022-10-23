@@ -10,7 +10,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,6 +33,7 @@ public class ScheduleService {
     public Schedule insertSchedule(Schedule schedule) {
         Transaction transaction = transactionService.getTransaction(schedule.getTransactionId()).get();
         schedule.setBaseTransaction(transaction);
+        schedule.setUserId(transaction.getUserId());
         Schedule scheduleInserted = scheduleRepository.insert(schedule);
         return scheduleInserted;
     }
@@ -61,14 +61,14 @@ public class ScheduleService {
     public List<Schedule> getSchedulesToCreateToday() {
         int today = LocalDateTime.now().getDayOfMonth();
         List<Schedule> schedulesToCreateToday = scheduleRepository
-                .findByDayOfMonthAndHasDefinedAmountIsTrueAndUserId(today, userService.getLoggedUserId()).get();
+                .findByDayOfMonthAndIsFixedValueIsTrueAndUserId(today, userService.getLoggedUserId()).get();
         return schedulesToCreateToday;
     }
 
     public List<Schedule> getSchedulesToNotifyToday() {
         int today = LocalDateTime.now().getDayOfMonth();
         List<Schedule> schedulesToCreateToday = scheduleRepository
-                .findByDayOfMonthAndHasDefinedAmountIsFalseAndUserId(today, userService.getLoggedUserId()).get();
+                .findByDayOfMonthAndIsFixedValueIsFalseAndUserId(today, userService.getLoggedUserId()).get();
         return schedulesToCreateToday;
     }
 
