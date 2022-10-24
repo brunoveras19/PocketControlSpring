@@ -31,7 +31,7 @@ public class ScheduleService {
     }
 
     public Schedule insertSchedule(Schedule schedule) {
-        Transaction transaction = transactionService.getTransaction(schedule.getTransactionId()).get();
+        Transaction transaction = transactionService.getTransaction(schedule.getId()).get();
         schedule.setBaseTransaction(transaction);
         schedule.setUserId(transaction.getUserId());
         Schedule scheduleInserted = scheduleRepository.insert(schedule);

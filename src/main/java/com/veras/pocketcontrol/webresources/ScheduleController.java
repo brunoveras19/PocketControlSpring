@@ -5,6 +5,7 @@ import com.veras.pocketcontrol.services.ScheduleService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,17 @@ public class ScheduleController {
             return ResponseEntity.of(schedule);
         } else {
             return ResponseEntity.of(Optional.of(Collections.emptyList()));
+        }
+    }
+
+    @GetMapping("/by-transaction")
+    @ApiOperation(value = "", authorizations = { @Authorization(value="jwtToken") })
+    public ResponseEntity<Schedule> fetchSchedulesById(@RequestParam(required = false) String transactionId) {
+        Optional<Schedule> schedule = scheduleService.getSchedule(transactionId);
+        if(schedule.isPresent()){
+            return ResponseEntity.of(schedule);
+        } else {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
     }
 

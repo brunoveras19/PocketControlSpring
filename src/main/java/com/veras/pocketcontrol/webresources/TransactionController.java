@@ -1,5 +1,6 @@
 package com.veras.pocketcontrol.webresources;
 
+import com.veras.pocketcontrol.exceptions.TransactionWithScheduleException;
 import com.veras.pocketcontrol.models.DTO.CreateTransactionDTO;
 import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
@@ -7,6 +8,8 @@ import com.veras.pocketcontrol.services.TransactionService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("api/transactions")
 @AllArgsConstructor
+@Slf4j
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -53,7 +57,7 @@ public class TransactionController {
         Transaction transaction = transactionService.insertTransaction(createTransactionDTO.getTransaction());
         if(createTransactionDTO.getIsSchedule()){
             Schedule schedule = Schedule.builder()
-                    .transactionId(transaction.getId())
+                    .id(transaction.getId())
                     .dayOfMonth(transaction.getDate().getDayOfMonth())
                     .description(transaction.getDescription())
                     .isFixedValue(createTransactionDTO.getIsFixedValue())
@@ -72,7 +76,14 @@ public class TransactionController {
 
     @DeleteMapping
     @ApiOperation(value = "Deletar Transação", authorizations = { @Authorization(value="jwtToken") })
-    public Transaction deleteTransaction(@RequestParam String id) {
-        return transactionService.deleteTransaction(id);
+    public ResponseEntity<Transaction> deleteTransaction(@RequestParam String id) {
+        ResponseEntity<Schedule> response = scheduleController.fetchSchedulesById(id);
+        log.info(response.toString());
+        if(response.getStatusCode() != HttpStatus.NO_CONTENT){
+            log.info("existe agendamento");
+            return ResponseEntity.status(409).build();
+        }else {
+            return ResponseEntity.ok(transactionService.deleteTransaction(id));
+        }
     }
 }
