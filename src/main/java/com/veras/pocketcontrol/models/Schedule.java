@@ -17,8 +17,6 @@ public class Schedule {
 
     private Integer dayOfMonth;
 
-    private String transactionId;
-
     private Transaction baseTransaction;
 
     private String userId;

@@ -1,5 +1,7 @@
 package com.veras.pocketcontrol.services;
 
+import com.veras.pocketcontrol.exceptions.TransactionWithScheduleException;
+import com.veras.pocketcontrol.models.Schedule;
 import com.veras.pocketcontrol.models.Transaction;
 import com.veras.pocketcontrol.repositories.TransactionRepository;
 import lombok.AllArgsConstructor;
